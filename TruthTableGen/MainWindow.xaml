@@ -1,14 +1,39 @@
 ﻿<Window x:Class="TruthTableGen.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Height="350" Width="525" Title="Boolean Expr -> Truth Table">
+        Height="650" Width="575" Title="Boolean Expression Evaluator" SizeChanged="Window_SizeChanged">
     <Grid>
-        <DataGrid Name="TruthTable" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,60,10.4,0" AreRowDetailsFrozen="True" HeadersVisibility="Column" CanUserResizeRows="False" RowDetailsVisibilityMode="Visible" IsReadOnly="True" ClipboardCopyMode="IncludeHeader" FontWeight="Bold" FontSize="15"/>
-        <TextBox Name="Query" HorizontalAlignment="Left" Height="23" Margin="10,32,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="357"/>
-        <Button Name="Go" Content="Go" HorizontalAlignment="Left" VerticalAlignment="Top" Width="59" Margin="368,32,0,0" Height="23" Click="Button_Click"/>
+        <TextBox Name="Query" HorizontalAlignment="Left" Height="23" Margin="10,32,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="470"/>
         <Label Content="Enter the query" HorizontalAlignment="Left" Margin="4,6,0,0" VerticalAlignment="Top" Width="100"/>
-        <Button Name="GetPlan" Content="Get Plan" HorizontalAlignment="Left" VerticalAlignment="Top" Width="53" Margin="428,32,0,0" Height="23" Click="Button_Click"/>
-        <Button Name="Instructions" Content="?" HorizontalAlignment="Left" VerticalAlignment="Top" Width="23" Margin="482,32,0,0" Height="23" Click="Button_Click" FontWeight="Bold" FontSize="15"/>
-        <Label Content="© Kappspot" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="399,6,0,0" VerticalAlignment="Top" Width="110"/>
+        <Button Name="Go" Content="Go" HorizontalAlignment="Left" VerticalAlignment="Top" Width="60" Margin="485,32,0,0" Height="23" Click="Button_Click"/>
+        <Label Content="© Kappspot" HorizontalContentAlignment="Right" HorizontalAlignment="Right" Margin="0,6,10,0" VerticalAlignment="Top" Width="110"/>
+        <TabControl Name="TabContainer" HorizontalAlignment="Left" Margin="10,75,10,10" VerticalAlignment="Top" MinWidth="535" MinHeight="500">
+            <TabItem Header="Truth Table">
+                <Grid Background="#FFE5E5E5">
+                    <Label Name="TableLabel" Content="Truth Table" HorizontalAlignment="Left" FontSize="15" Margin="0,10,0,0" VerticalAlignment="Top"/>
+                    <DataGrid Name="TruthTable" HorizontalAlignment="Left" VerticalAlignment="Top" AreRowDetailsFrozen="True" Margin="10, 50" HeadersVisibility="Column" CanUserResizeRows="False" RowDetailsVisibilityMode="Visible" IsReadOnly="True" ClipboardCopyMode="IncludeHeader" FontWeight="Bold" FontSize="15"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Plan Tree">
+                <Grid Background="#FFE5E5E5" ScrollViewer.CanContentScroll="True">
+                    <ScrollViewer HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10, 50" Width="Auto" Height="Auto" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                        <Grid Background="White" Name="TreePlan" ScrollViewer.CanContentScroll="True"/>
+                    </ScrollViewer>
+                    <Label Name="PlanLabel" Content="Tree Plan" HorizontalAlignment="Left" FontSize="15" Margin="0,10,0,0" VerticalAlignment="Top"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Evaluation Plan">
+                <Grid Background="#FFE5E5E5">
+                    <TextBox Name="Plan" HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" VerticalAlignment="Top" Width="Auto" Margin="10, 50"/>
+                    <Label Name="EvalLabel" Content="Truth Table" HorizontalAlignment="Left" FontSize="15" Margin="0,10,0,0" VerticalAlignment="Top"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Instructions">
+                <Grid Background="#FFE5E5E5">
+                    <TextBlock Name="Instruction" Background="White"  HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" VerticalAlignment="Top" Width="Auto" Margin="10, 50"/>
+                    <Label  Content="Instructions" HorizontalAlignment="Left" FontSize="15" Margin="0,10,0,0" VerticalAlignment="Top"/>
+                </Grid>
+            </TabItem>
+        </TabControl>
     </Grid>
 </Window>

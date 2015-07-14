@@ -7,12 +7,12 @@ using System.Windows;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("TruthTableGen")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Boolean Expression Evaluator")]
+[assembly: AssemblyDescription("Evaluates the given boolean expression")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("TruthTableGen")]
-[assembly: AssemblyCopyright("Copyright ©  2015")]
+[assembly: AssemblyCompany("Kappspot")]
+[assembly: AssemblyProduct("Boolean Expression Evaluator")]
+[assembly: AssemblyCopyright("Kappspot ©  2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
