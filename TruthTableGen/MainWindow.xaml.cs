@@ -286,7 +286,7 @@ namespace TruthTableGen
         /// <summary>
         /// This class contains the basic functionalities required to produce a tree Diagram of the evaluation plan
         /// </summary>
-        public class Tree
+        public class TreeNode
         {
             //Static fields for reusability
             public static int OFFSET = 60;
@@ -306,7 +306,7 @@ namespace TruthTableGen
             /// <param name="result">This is a string that represents the result of the nodes operation</param>
             /// <param name="yOffset">The yOffset from the top that indicates the depth of the node</param>
             /// <param name="xOffset">The position of the node along the x - axis</param>
-            public Tree(Field data, string result, int yOffset, int xOffset)
+            public TreeNode(Field data, string result, int yOffset, int xOffset)
             {
                 this.data = data;
                 this.result = result;
@@ -317,7 +317,7 @@ namespace TruthTableGen
             }
 
             /// <summary>
-            /// This function initializes the graphics components for the Tree view
+            /// This function initializes the graphics components for the node of the Tree
             /// </summary>
             void InitializeGraphics()
             {
@@ -360,16 +360,16 @@ namespace TruthTableGen
             /// <param name="x2">The ending point's X coordinate</param>
             /// <param name="y2">The ending point's Y coordinate</param>
             /// <returns>The generated line between the nodes</returns>
-            public static Line Connector(double x1, double y1, double x2, double y2)
+            public static Line Connector(TreeNode node1, TreeNode node2)
             {
                 //Create a new line
                 Line connector = new Line();
 
                 //Set the start and the end points of the line
-                connector.X1 = x1 + SIZE / 2;
-                connector.Y1 = y1 + SIZE / 2;
-                connector.X2 = x2 + SIZE / 2;
-                connector.Y2 = y2 + SIZE / 2;
+                connector.X1 = node1.ellipse.Margin.Left + SIZE / 2;
+                connector.Y1 = node1.ellipse.Margin.Top + SIZE / 2;
+                connector.X2 = node2.ellipse.Margin.Left + SIZE / 2;
+                connector.Y2 = node2.ellipse.Margin.Top + SIZE / 2;
 
                 //Add some house-keeping
                 connector.Stroke = Brushes.Black;
@@ -382,7 +382,7 @@ namespace TruthTableGen
 
         /// <summary>
         /// Construtor to initalize the window
-        /// It also initializes the Tree view
+        /// It also initializes the Tree view using the TreeNode class
         /// </summary>
         /// <param name="evalPlan">The evaluation plan of the Query sent from the MainWindow class</param>
         /// <param name="TreePlan">The Grid where the Tree is to be inserted</param>
@@ -400,52 +400,41 @@ namespace TruthTableGen
 
             //Clear the window
             //Draw the tree
-            //Then using its results adjust the window height and width
             TreePlan.Children.Clear();
-            Draw(finalResult, 1);
+            DrawNode(finalResult, 1);
         }
 
         /// <summary>
-        /// Creates the tree based on the evalPlan
+        /// Creates the tree based on the evalPlan using the TreeNode objects
         /// </summary>
         /// <param name="key">The current node's identifier on the evaluation plan dictionary</param>
         /// <param name="yOffset">The level at which the current node is supposed to be printed</param>
         /// <returns>The current node for further processing</returns>
-        public Tree Draw(string key, int yOffset)
+        public TreeNode DrawNode(string key, int yOffset)
         {
             //Extract the current node from the Dictionary class instance
             Field currentField = evalPlan[key];
-            Tree leftNode = null, rightNode = null;
+            TreeNode leftNode = null, rightNode = null;
 
             //Inorder Traversal: Traverses the left node then the central node and then the right node
             //The left and right nodes are needed for creating the connectors
-            if (key.Length != 1 && currentField.fieldOpr != '~') { leftNode = Draw(currentField.leftOpd, yOffset + 1); }    //The negation operator will not have a left node
-            Tree currentNode = new Tree(currentField, key, yOffset, xOffset++);
-            if (key.Length != 1) { rightNode = Draw(currentField.rightOpd, yOffset + 1); }
-
-            //If there is a left node then create the connector for the left node and the parent node
-            //Here we use Insert(0, *) instead of .Add(*) because we want to display the Bubbles over he Connecting lines
-            if (leftNode != null)
-            {
-                TreePlan.Children.Insert(0, Tree.Connector(currentNode.ellipse.Margin.Left,
-                                                        currentNode.ellipse.Margin.Top,
-                                                        leftNode.ellipse.Margin.Left,
-                                                        leftNode.ellipse.Margin.Top));
-            }
+            //Recursive call to create the left sub-tree
+            if (key.Length != 1 && currentField.fieldOpr != '~') { leftNode = DrawNode(currentField.leftOpd, yOffset + 1); }    //The negation operator will not have a left node
 
             //Add the contents of the current node
+            //This will become the parent of the left and the right sub-trees
+            TreeNode currentNode = new TreeNode(currentField, key, yOffset, xOffset++);
             TreePlan.Children.Add(currentNode.ellipse);
             TreePlan.Children.Add(currentNode.content);
 
+            //Recursive call to create the right sub-tree
+            if (key.Length != 1) { rightNode = DrawNode(currentField.rightOpd, yOffset + 1); }
+
+            //If there is a left node then create the connector for the left node and the parent node
             //If there is a right node then create the connector for the left node and the parent node
             //Here we use Insert(0, *) instead of .Add(*) because we want to display the Bubbles over he Connecting lines
-            if (rightNode != null)
-            {
-                TreePlan.Children.Insert(0, Tree.Connector(currentNode.ellipse.Margin.Left,
-                                                        currentNode.ellipse.Margin.Top,
-                                                        rightNode.ellipse.Margin.Left,
-                                                        rightNode.ellipse.Margin.Top));
-            }
+            if (leftNode != null) { TreePlan.Children.Insert(0, TreeNode.Connector(currentNode, leftNode)); }
+            if (rightNode != null) { TreePlan.Children.Insert(0, TreeNode.Connector(currentNode, rightNode)); }
 
             //Return the current node
             return currentNode;
