@@ -34,7 +34,7 @@ namespace TruthTableGen
         /// </summary>
         /// <param name="inp">The operator of type int</param>
         /// <returns>The precedance of the operator (Lower the value higher the precedance)</returns>
-        static char[] prec = { '(', '~', '&', '|', '>', '-', ')' };
+        static char[] prec = { '(', '¬', '∧', '∨', '→', '↔', ')' };
         int FindPrec(char inp)
         {
             for (int i = 0; i < prec.Length; i++) { if (prec[i] == inp) { return i; } }
@@ -90,7 +90,7 @@ namespace TruthTableGen
                             {
                                 //Get the plan according to the operator
                                 Field columnField = new Field();
-                                if (boolOpr.Peek() == '~')
+                                if (boolOpr.Peek() == '¬')
                                 {
                                     columnField.rightOpd = boolOpd.Pop();
                                     columnField.fieldOpr = boolOpr.Pop();
@@ -121,6 +121,19 @@ namespace TruthTableGen
         }
 
         /// <summary>
+        /// This is used to get the final result column
+        /// </summary>
+        /// <returns>The column with the truth values</returns>
+        public bool[] GetResultData()
+        {
+            //The result field is the column with the biggest key value
+            string result = "";
+            bool[] resultData = null;
+            foreach (var i in EvalPlan) { if (result.Length < i.Key.Length) { result = i.Key; resultData = i.Value.fieldResult.ToArray(); } }
+            return resultData;
+        }
+
+        /// <summary>
         ///     Used to return the result of evaluation of a boolean operation on an array of operands
         /// </summary>
         /// <param name="leftOpd">LHS of the boolean operator</param>
@@ -135,19 +148,19 @@ namespace TruthTableGen
             //Since, negation is a unary operator - use only the RHS operand 
             switch (boolOpr)
             {
-                case '~':
+                case '¬':
                     for (int i = 0; i < rightOpd.Count; i++) { resultOpd.Add(!rightOpd[i]); }
                     break;
-                case '&':
+                case '∧':
                     for (int i = 0; i < leftOpd.Count; i++) { resultOpd.Add(leftOpd[i] && rightOpd[i]); }
                     break;
-                case '|':
+                case '∨':
                     for (int i = 0; i < leftOpd.Count; i++) { resultOpd.Add(leftOpd[i] || rightOpd[i]); }
                     break;
-                case '>':
+                case '→':
                     for (int i = 0; i < leftOpd.Count; i++) { resultOpd.Add(!leftOpd[i] || rightOpd[i]); }
                     break;
-                case '-':
+                case '↔':
                     for (int i = 0; i < leftOpd.Count; i++) { resultOpd.Add(leftOpd[i] == rightOpd[i]); }
                     break;
             }
@@ -200,7 +213,7 @@ namespace TruthTableGen
             foreach (var field in EvalPlan)
             {
                 if (field.Key.Length == 1) { varCount = AddVar(field.Key, varCount); }  //For unary operators, the LHS is left free as NULL
-                else { field.Value.fieldResult = ExecOp(field.Value.fieldOpr != '~' ? EvalPlan[field.Value.leftOpd].fieldResult : null, EvalPlan[field.Value.rightOpd].fieldResult, field.Value.fieldOpr); }
+                else { field.Value.fieldResult = ExecOp(field.Value.fieldOpr != '¬' ? EvalPlan[field.Value.leftOpd].fieldResult : null, EvalPlan[field.Value.rightOpd].fieldResult, field.Value.fieldOpr); }
             }
 
             //Generate the table based on the results of the evaluation 
@@ -214,9 +227,6 @@ namespace TruthTableGen
         /// <returns>A string which gives us the evaluation plan</returns>
         public string GetEvaluationPlan()
         {
-            //Get the evaluation plan
-            EvalPlan = FindEvalPlan();
-
             string actualPlan = "";
 
             //The keys of the eval plan have the data needed
@@ -264,7 +274,7 @@ namespace TruthTableGen
             string tableViewSort = "";
             foreach (DataColumn x in truthTable.Columns)
             {
-                if (x.ColumnName.Length == 2) { tableViewSort += x.ColumnName + " ASC , "; }
+                if (x.ColumnName.Length == 2) { tableViewSort += x.ColumnName + " DESC , "; }
             }
             tableView.Sort = tableViewSort.Remove(tableViewSort.Length - 3, 3);
 
@@ -346,6 +356,8 @@ namespace TruthTableGen
                 content.HorizontalContentAlignment = HorizontalAlignment.Center;
                 content.VerticalContentAlignment = VerticalAlignment.Center;
                 content.ToolTip = result;
+                content.FontSize = 15;
+                content.FontWeight = FontWeights.ExtraBold;
 
                 //Align the graphics elements to a left top margin system
                 content.HorizontalAlignment = ellipse.HorizontalAlignment = HorizontalAlignment.Left;
@@ -419,7 +431,7 @@ namespace TruthTableGen
             //Inorder Traversal: Traverses the left node then the central node and then the right node
             //The left and right nodes are needed for creating the connectors
             //Recursive call to create the left sub-tree
-            if (key.Length != 1 && currentField.fieldOpr != '~') { leftNode = DrawNode(currentField.leftOpd, yOffset + 1); }    //The negation operator will not have a left node
+            if (key.Length != 1 && currentField.fieldOpr != '¬') { leftNode = DrawNode(currentField.leftOpd, yOffset + 1); }    //The negation operator will not have a left node
 
             //Add the contents of the current node
             //This will become the parent of the left and the right sub-trees
@@ -463,7 +475,10 @@ namespace TruthTableGen
                 "3. ~ = NOT operator" + "\n\t\t" +
                 "4. > = IMPLIES operator" + "\n\t\t" +
                 "5. - = BI-CONDITIONAL operator" + "\n\t*" +
-                "Get Plan: Gives you a copy of the plan used to evaluate the expression" + "\n\t*" +
+                "PCNF, PDNF: Gives the PCNF and PDNF of the query" + "\n\t*" +
+                "Plan Tree: Gives the parsing tree of the query" + "\n\t*" +
+                "Evaluations Plan: Gives you a copy of the plan used to evaluate the expression" + "\n\t*" +
+                "Equivalence Test: Tells you whether two expressions are euivalent or not" + "\n\t*" +
                 "Go: Gives the result of the evaluation using the generated evalutation plan";
             Instruction.Text = Instr;
         }
@@ -477,15 +492,20 @@ namespace TruthTableGen
         {
             try
             {
+                //Format the input text to change the operators
+                Query.Text = FormatInput(Query.Text);
+
                 //Create an instance of the evaluator class
                 Evaluator evaluator = new Evaluator(Query.Text);
 
                 //Display a heading on each tab
-                EvalLabel.Content = TableLabel.Content = PlanLabel.Content = "Query: " + evaluator.Query;
+                PdnfLabel.Content = PcnfLabel.Content = EvalLabel.Content = TableLabel.Content = PlanLabel.Content = "Query: " + evaluator.Query;
 
                 //Update the truth Table, tree view and the plan textbox
                 TruthTable.ItemsSource = evaluator.EvaluateQuery();
                 new TreeDiag(evaluator.EvalPlan, TreePlan);
+                Pcnf.Text = FindNormalForm(evaluator.EvalPlan, false, '∨', '∧');
+                Pdnf.Text = FindNormalForm(evaluator.EvalPlan, true, '∧', '∨');
                 Plan.Text = evaluator.GetEvaluationPlan();
             }
             catch
@@ -519,6 +539,132 @@ namespace TruthTableGen
             queryMargin.Left = TabContainer.Margin.Left;
             Query.Width = goMargin.Left - 10 - queryMargin.Left;
             Query.Margin = queryMargin;
+
+            //Correct the parameters of the Compare Button
+            goMargin = Compare.Margin;
+            goMargin.Left = TabContainer.Width + TabContainer.Margin.Left - Go.Width - 30;
+            Compare.Margin = goMargin;
+
+            //Correct the parameters of the CompareQuery TextBox
+            queryMargin = CompareQuery.Margin;
+            queryMargin.Left = TabContainer.Margin.Left;
+            CompareQuery.Width = goMargin.Left - 10 - queryMargin.Left;
+            CompareQuery.Margin = queryMargin;
+        }
+
+        /// <summary>
+        /// Formats the input to replace the dummy operators with their actual symbol
+        /// </summary>
+        /// <param name="inputText">The text which contains the boolean expression</param>
+        /// <returns>The formatted string with the correct operator syymbols</returns>
+        private string FormatInput(string inputText)
+        {
+            //Replacing all the dummy operators with their actual symbols
+            inputText = inputText.Replace('~', '¬');
+            inputText = inputText.Replace('|', '∨');
+            inputText = inputText.Replace('&', '∧');
+            inputText = inputText.Replace('-', '↔');
+            inputText = inputText.Replace('>', '→');
+            return inputText;
+        }
+
+        /// <summary>
+        /// This function is used to find the PCNF and PDNF of the given query
+        /// The procedure is based on the evaluation plan
+        /// </summary>
+        /// <param name="evalResults">The results of the query after evaluation</param>
+        /// <param name="truth">Whether it is a minterm or maxterm</param>
+        /// <param name="op1">The operator within brackets</param>
+        /// <param name="op2">The operator outside the brackets</param>
+        /// <returns>The string with the normal form which is either a pcnf or pdnf</returns>
+        private string FindNormalForm(Dictionary<string, Field> evalResults, bool truth, char op1, char op2)
+        {
+            //Initialize the normal form string
+            string normalForm = "";
+
+            //Get the result field and the variables field
+            string resultId = "";
+            Field result = null;
+            List<KeyValuePair<string, Field>> variables = new List<KeyValuePair<string, Field>>();
+            foreach (var i in evalResults)
+            {
+                if (resultId.Length < i.Key.Length) { result = i.Value; resultId = i.Key; }
+                if (i.Key.Length == 1) { variables.Add(i); }
+            }
+
+            //Produce the minterms and the maxterms
+            for (int i = 0; i < result.fieldResult.Count; i++)
+            {
+                //If it equals the truth value
+                //Then add the new term
+                if (result.fieldResult[i] == truth)
+                {
+                    normalForm += " ( ";
+                    foreach (var j in variables)
+                    {
+                        //If the current value is false
+                        //Then add the negation operator
+                        if (j.Value.fieldResult[i] == false) { normalForm += "¬"; } else { normalForm += "  "; }
+                        normalForm += j.Key + " " + op1 + " ";
+                    }
+                    //Delete the extra operator
+                    normalForm = normalForm.Substring(0, normalForm.Length - 3);
+                    normalForm += " ) " + op2 + " \n";
+                }
+            }
+            //Delete the extra operator
+            normalForm = normalForm.Substring(0, normalForm.Length - 3);
+
+            //return the normal form string
+            return normalForm;
+        }
+
+        /// <summary>
+        /// Called when we want to compare two strings
+        /// </summary>
+        /// <param name="sender">Compare Button</param>
+        /// <param name="e">Event Args</param>
+        private void Compare_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                //Format the input text to change the operators
+                Query.Text = FormatInput(Query.Text);
+                CompareQuery.Text = FormatInput(CompareQuery.Text);
+
+                //Create an instance of the evaluator class
+                Evaluator evaluator1 = new Evaluator(Query.Text);
+                Evaluator evaluator2 = new Evaluator(CompareQuery.Text);
+
+                //Evaluate query and find the results
+                evaluator1.EvaluateQuery();
+                evaluator2.EvaluateQuery();
+
+                //Get the results array
+                bool[] query1Result = evaluator1.GetResultData();
+                bool[] query2Result = evaluator2.GetResultData();
+
+                //Compare each of the result fields
+                bool equalFlag = false;
+                if(query1Result.Length == query2Result.Length)
+                {
+                    equalFlag = true;
+                    for (int i = 0; i < query1Result.Length; i++) { if (query1Result[i] != query2Result[i]) { equalFlag = false; break; } }
+                }
+
+                //Display a message box according to the result
+                if (equalFlag == true) { MessageBox.Show("The two expressions are Equivalent", "Equivalent Expressions"); }
+                else { MessageBox.Show("The two expressions are not Equivalent", "Non - Equivalent Expressions"); }
+                
+            }
+            catch
+            {
+                //If, at all anything goes wrong
+                //The only possible case is when the symbols are unbalanced
+                //Or, there is no input in the text-box
+                if (Query.Text.Length == 0 || CompareQuery.Text.Length == 0) { MessageBox.Show("No Query in the Text Box", "No Query"); }
+                else { MessageBox.Show("Warning: Unbalanced Symbols found in the Stack", "Error in Query"); }
+            }
         }
     }
 }
