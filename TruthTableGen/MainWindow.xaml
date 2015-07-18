@@ -16,13 +16,13 @@
             </TabItem>
             <TabItem Header="PCNF" ToolTip="The PCNF of the above expression">
                 <Grid Background="#FFE5E5E5">
-                    <TextBox Name="Pcnf" HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" VerticalAlignment="Top" Width="Auto" Margin="10, 50" FontSize="15" FontWeight="Bold"/>
+                    <TextBox Name="Pcnf" HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" VerticalAlignment="Top" Width="Auto" Margin="10, 50" FontSize="15" FontWeight="Bold" AcceptsReturn="True"/>
                     <Label Name="PcnfLabel" Content="PCNF" HorizontalAlignment="Left" FontSize="15" Margin="0,10,0,0" VerticalAlignment="Top"/>
                 </Grid>
             </TabItem>
             <TabItem Header="PDNF" ToolTip="The PDNF of the above expression">
                 <Grid Background="#FFE5E5E5">
-                    <TextBox Name="Pdnf" HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" VerticalAlignment="Top" Width="Auto" Margin="10, 50" FontSize="15" FontWeight="Bold"/>
+                    <TextBox Name="Pdnf" HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" VerticalAlignment="Top" Width="Auto" Margin="10, 50" FontSize="15" FontWeight="Bold" AcceptsReturn="True"/>
                     <Label Name="PdnfLabel" Content="PDNF" HorizontalAlignment="Left" FontSize="15" Margin="0,10,0,0" VerticalAlignment="Top"/>
                 </Grid>
             </TabItem>
