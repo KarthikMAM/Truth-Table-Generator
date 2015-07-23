@@ -3,10 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Height="650" Width="575" Title="Boolean Expression Evaluator" SizeChanged="Window_SizeChanged">
     <Grid>
-        <TextBox Name="Query" HorizontalAlignment="Left" Height="23" Margin="10,32,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="470"/>
+        <TextBox Name="Query" HorizontalAlignment="Left" Height="23" Margin="10,32,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="470" TextChanged="Query_TextChanged" PreviewKeyDown="Query_PreviewKeyDown"/>
         <Label Content="Enter the query" HorizontalAlignment="Left" Margin="4,6,0,0" VerticalAlignment="Top" Width="100"/>
         <Button Name="Go" Content="Go" HorizontalAlignment="Left" VerticalAlignment="Top" Width="60" Margin="485,32,0,0" Height="23" Click="Button_Click"/>
-        <Label Content="© Kappspot" HorizontalContentAlignment="Right" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" Width="110"/>
+        <Label Content="© Karthik M A M" HorizontalContentAlignment="Right" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" Width="110"/>
         <TabControl Name="TabContainer" HorizontalAlignment="Left" Margin="10,75,10,10" VerticalAlignment="Top" MinWidth="535" MinHeight="500">
             <TabItem Header="Truth Table" ToolTip="The truth table of the above expression">
                 <Grid Background="#FFE5E5E5">
@@ -36,18 +36,18 @@
             </TabItem>
             <TabItem Header="Evaluation Plan" ToolTip="Plan for evaluating the query">
                 <Grid Background="#FFE5E5E5">
-                    <TextBox Name="Plan" HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" VerticalAlignment="Top" Width="Auto" Margin="10, 50"/>
+                    <TextBox Name="Plan" HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" VerticalAlignment="Top" Width="Auto" Margin="10, 50" FontSize="15" FontWeight="Bold" AcceptsReturn="True"/>
                     <Label Name="EvalLabel" Content="Truth Table" HorizontalAlignment="Left" FontSize="15" Margin="0,10,0,0" VerticalAlignment="Top"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Equivalence Test" ToolTip="Compare two expressions">
                 <Grid Background="#FFE5E5E5">
-                    <TextBox Name="CompareQuery" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Margin="10,45,0,0" MinWidth="300"/>
+                    <TextBox Name="CompareQuery" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Margin="10,45,0,0" MinWidth="300" TextChanged="Query_TextChanged"/>
                     <Label Content="Enter the Query to Compare" HorizontalAlignment="Left" FontSize="15" Margin="0,10,0,0" VerticalAlignment="Top"/>
                     <Button Name="Compare" Content="Compare" HorizontalAlignment="Left" VerticalAlignment="Top" Width="60" Margin="462,45,0,0" Height="23" Click="Compare_Click"/>
                 </Grid>
             </TabItem>
-            <TabItem Header="Instructions">
+            <TabItem Header="Instructions" IsSelected="True">
                 <Grid Background="#FFE5E5E5">
                     <TextBlock Name="Instruction" Background="White"  HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" VerticalAlignment="Top" Width="Auto" Margin="10, 50"/>
                     <Label  Content="Instructions" HorizontalAlignment="Left" FontSize="15" Margin="0,10,0,0" VerticalAlignment="Top"/>

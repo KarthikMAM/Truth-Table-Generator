@@ -44,7 +44,7 @@ namespace TruthTableGen
         /// </summary>
         /// <param name="sender">Represents the button clicked</param>
         /// <param name="e">Eventargs</param>
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void Button_Click(object sender, EventArgs e)
         {
             try
             {
@@ -121,6 +121,12 @@ namespace TruthTableGen
             inputText = inputText.Replace('&', '∧');
             inputText = inputText.Replace('-', '↔');
             inputText = inputText.Replace('>', '→');
+
+            for(int i=0; i<inputText.Length; i++)
+            {
+                if (Char.IsLetter(inputText[i]) == true  || Evaluator.prec.Contains(inputText[i]) == true || inputText[i] == ' ') { }
+                else { inputText = inputText.Remove(i); }
+            }
             return inputText;
         }
 
@@ -129,7 +135,7 @@ namespace TruthTableGen
         /// </summary>
         /// <param name="sender">Compare Button</param>
         /// <param name="e">Event Args</param>
-        private void Compare_Click(object sender, RoutedEventArgs e)
+        private void Compare_Click(object sender, EventArgs e)
         {
             try
             {
@@ -169,6 +175,30 @@ namespace TruthTableGen
                 //Or, there is no input in the text-box
                 if (Query.Text.Length == 0 || CompareQuery.Text.Length == 0) { MessageBox.Show("No Query in the Text Box", "No Query"); }
                 else { MessageBox.Show("Warning: Unbalanced Symbols found in the Stack", "Error in Query"); }
+            }
+        }
+
+        private void Query_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            TextBox sendText = sender as TextBox;
+            sendText.Text = FormatInput(sendText.Text);
+            sendText.Select(sendText.Text.Length, 0);
+        }
+
+        private void Query_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Enter) 
+            {
+                switch((sender as TextBox).Name)
+                {
+                    case "Query":
+                        Button_Click(sender, new EventArgs());
+                        break;
+                    case "Compare":
+                        Compare_Click(sender, new EventArgs());
+                        break;
+
+                }
             }
         }
     }

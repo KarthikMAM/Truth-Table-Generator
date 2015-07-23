@@ -30,7 +30,7 @@ namespace TruthTableGen
         /// </summary>
         /// <param name="inp">The operator of type int</param>
         /// <returns>The precedance of the operator (Lower the value higher the precedance)</returns>
-        static char[] prec = { '(', '¬', '∧', '∨', '→', '↔', ')' };
+        public static char[] prec = { '(', '¬', '∧', '∨', '→', '↔', ')' };
         int FindPrec(char inp)
         {
             for (int i = 0; i < prec.Length; i++) { if (prec[i] == inp) { return i; } }
@@ -130,7 +130,7 @@ namespace TruthTableGen
         }
 
         /// <summary>
-        ///     Used to return the result of evaluation of a boolean operation on an array of operands
+        /// Used to return the result of evaluation of a boolean operation on an array of operands
         /// </summary>
         /// <param name="leftOpd">LHS of the boolean operator</param>
         /// <param name="rightOpd">RHS of the boolean operator</param>
